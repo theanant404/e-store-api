@@ -1,9 +1,17 @@
-import { app } from "./app";
+import { httpServer } from "./app";
 
 
 
 const port = process.env.PORT || 8080;
 
-app.listen(port, () => {
-    console.log(`🚀 Server running at http://localhost:${port}`);
-});
+const startServer = () => {
+    httpServer.listen(process.env.PORT || 8080, () => {
+        console.info(
+            `📑 Visit the documentation at: http://localhost:${process.env.PORT || 8080
+            }`
+        );
+        console.log("⚙️  Server is running on port: " + port);
+    });
+};
+
+startServer();
