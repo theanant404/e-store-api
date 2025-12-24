@@ -11,26 +11,26 @@ const httpServer = createServer(app);
 app.use(helmet());
 
 // 2. CORS/App-Key Guard (Improved)
-app.use((req: Request, res: Response, next: NextFunction) => {
-    const appKey = req.header("x-app-key");
-    const origin = req.header("origin");
+// app.use((req: Request, res: Response, next: NextFunction) => {
+//     const appKey = req.header("x-app-key");
+//     const origin = req.header("origin");
 
-    // Whitelist specific origins
-    const allowedOrigins = [process.env.CLIENT_URL || "http://localhost:3000"];
-    if (origin && allowedOrigins.includes(origin)) {
-        return next();
-    }
+//     // Whitelist specific origins
+//     const allowedOrigins = [process.env.CLIENT_URL || "http://localhost:3000"];
+//     if (origin && allowedOrigins.includes(origin)) {
+//         return next();
+//     }
 
-    // Strict App Key check for non-browser clients (like Mobile Apps)
-    if (appKey !== process.env.MOBILE_APP_SECRET) { // Use env variables for secrets
-        return res.status(403).json({
-            success: false,
-            message: "Forbidden: Invalid App Key"
-        });
-    }
+//     // Strict App Key check for non-browser clients (like Mobile Apps)
+//     if (appKey !== process.env.MOBILE_APP_SECRET) { // Use env variables for secrets
+//         return res.status(403).json({
+//             success: false,
+//             message: "Forbidden: Invalid App Key"
+//         });
+//     }
 
-    next();
-});
+//     next();
+// });
 
 // 3. Rate Limiter (Corrected Types & Handler)
 const limiter = rateLimit({
