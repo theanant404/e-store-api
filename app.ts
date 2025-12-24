@@ -4,7 +4,6 @@ import { rateLimit, ipKeyGenerator, type Options } from "express-rate-limit"; //
 import cookieParser from "cookie-parser";
 import helmet from "helmet"; // SECURITY: Added Helmet
 import { ApiError } from "./src/utils/ApiError";
-
 const app = express();
 const httpServer = createServer(app);
 
@@ -17,7 +16,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     const origin = req.header("origin");
 
     // Whitelist specific origins
-    const allowedOrigins = ["http://localhost:3000"];
+    const allowedOrigins = [process.env.CLIENT_URL || "http://localhost:3000"];
     if (origin && allowedOrigins.includes(origin)) {
         return next();
     }
@@ -61,7 +60,12 @@ app.use(express.static("public"));
 
 // 5. Routes
 app.get("/", (_req: Request, res: Response) => {
-    res.json({ success: true, message: "Welcome to the Home Page" });
+    type User = {
+        id: string;
+        name: string;
+    };
+    let user: User = { id: "1", name: "Anant" };
+    res.json({ success: true, message: "Welcome to the Home Page", timestamp: new Date().toISOString(), user });
 });
 
 app.get("/healthz", (_req: Request, res: Response) => {
