@@ -38,8 +38,8 @@ const limiter = rateLimit({
     limit: 5000,
     standardHeaders: 'draft-8', // Use latest IETF standard headers
     legacyHeaders: false,
-    // Use helper to ensure IPv6 is handled correctly
-    keyGenerator: (req: Request) => ipKeyGenerator(req.ip ?? ""),
+    // Use helper to ensure IPv6 is handled correctly; ipKeyGenerator expects an IP string
+    keyGenerator: (req: Request) => ipKeyGenerator(req.ip ?? req.socket.remoteAddress ?? ""),
     handler: (req: Request, res: Response, next: NextFunction, options: Options) => {
         const minutes = options.windowMs / 60000;
         // Pass error to next() instead of throwing inside handler
@@ -83,5 +83,6 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 export { app, httpServer };
+export default app;
 
 
