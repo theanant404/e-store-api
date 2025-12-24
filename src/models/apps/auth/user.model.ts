@@ -9,6 +9,7 @@ const SALT_ROUNDS = 10;
 export interface IUser extends Document {
     name: string;
     email: string;
+    mobile?: string;
     password: string;
     role: string;
     isEmailVerified: boolean;
@@ -28,6 +29,7 @@ const userSchema = new Schema<IUser>(
     {
         name: { type: String, required: true, trim: true },
         email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+        mobile: { type: String, unique: true, sparse: true },
         password: { type: String, required: true, minlength: 8 },
         role: { type: String, enum: Object.values(UserRolesEnum), default: UserRolesEnum.USER },
         isEmailVerified: { type: Boolean, default: false },
@@ -37,11 +39,10 @@ const userSchema = new Schema<IUser>(
     { timestamps: true }
 );
 
-userSchema.pre("save", async function (next) {
-    if (!this.isModified("password")) return next();
+userSchema.pre("save", async function () {
+    if (!this.isModified("password")) return;
     const hash = await bcrypt.hash(this.password, SALT_ROUNDS);
     this.password = hash;
-    next();
 });
 
 userSchema.methods.isPasswordCorrect = async function (password: string) {
