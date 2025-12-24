@@ -1,0 +1,28 @@
+import jwt from "jsonwebtoken";
+
+const ACCESS_TOKEN_TTL = process.env.ACCESS_TOKEN_TTL || "15m";
+const REFRESH_TOKEN_TTL = process.env.REFRESH_TOKEN_TTL || "7d";
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || "access-secret";
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "refresh-secret";
+
+export type JwtPayload = {
+    _id: string;
+    role: string;
+    email: string;
+};
+
+export const signAccessToken = (payload: JwtPayload, expiresIn: string = ACCESS_TOKEN_TTL) => {
+    return jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn });
+};
+
+export const signRefreshToken = (payload: JwtPayload, expiresIn: string = REFRESH_TOKEN_TTL) => {
+    return jwt.sign(payload, REFRESH_TOKEN_SECRET, { expiresIn });
+};
+
+export const verifyAccessToken = (token: string): JwtPayload => {
+    return jwt.verify(token, ACCESS_TOKEN_SECRET) as JwtPayload;
+};
+
+export const verifyRefreshToken = (token: string): JwtPayload => {
+    return jwt.verify(token, REFRESH_TOKEN_SECRET) as JwtPayload;
+};

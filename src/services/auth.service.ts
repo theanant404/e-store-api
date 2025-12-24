@@ -1,0 +1,131 @@
+import { ApiError } from "../utils/ApiError";
+import { ApiResponse } from "../utils/ApiResponse";
+import { User, type IUser } from "../models/apps/auth/user.model";
+import { setOtp, getOtp, deleteOtp } from "../lib/redis";
+import { signAccessToken, signRefreshToken } from "../lib/jwt";
+import {
+    validateLoginInput,
+    validateRegisterInput,
+    validateVerifyOtpInput,
+    type LoginInput,
+    type RegisterInput,
+    type VerifyOtpInput,
+} from "../validators/auth.schema";
+
+const OTP_TTL_SECONDS = 10 * 60; // 10 minutes
+
+const sanitizeUser = (user: IUser) => {
+    const { password, refreshToken, __v, ...rest } = user.toObject({ versionKey: false });
+    return rest;
+};
+
+const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+async function sendOtp(email: string, name: string) {
+    const otp = generateOtp();
+    await setOtp(email, otp, OTP_TTL_SECONDS);
+    // TODO: Integrate real email provider. For now, log for visibility.
+    console.log(`OTP for ${email} (${name}): ${otp}`);
+}
+
+export async function register(input: any) {
+    let data: RegisterInput;
+    try {
+        data = validateRegisterInput(input);
+    } catch (err: any) {
+        throw new ApiError(400, err.message);
+    }
+
+    const existing = await User.findOne({ email: data.email });
+    if (existing) {
+        throw new ApiError(409, "User already exists with this email");
+    }
+
+    const user = await User.create({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        isEmailVerified: false,
+    });
+
+    await sendOtp(user.email, user.name);
+
+    return new ApiResponse(201, { user: sanitizeUser(user) }, "User registered. OTP sent to email.");
+}
+
+export async function verifyEmailOtp(input: any) {
+    let data: VerifyOtpInput;
+    try {
+        data = validateVerifyOtpInput(input);
+    } catch (err: any) {
+        throw new ApiError(400, err.message);
+    }
+
+    const user = await User.findOne({ email: data.email });
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    const storedOtp = await getOtp(data.email);
+    if (!storedOtp || storedOtp !== data.otp) {
+        throw new ApiError(400, "Invalid or expired OTP");
+    }
+
+    user.isEmailVerified = true;
+    await user.save({ validateBeforeSave: false });
+    await deleteOtp(data.email);
+
+    return new ApiResponse(200, { user: sanitizeUser(user) }, "Email verified");
+}
+
+export async function resendEmailOtp(input: any) {
+    let data: VerifyOtpInput;
+    try {
+        data = validateVerifyOtpInput(input);
+    } catch (err: any) {
+        throw new ApiError(400, err.message);
+    }
+
+    const user = await User.findOne({ email: data.email });
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    await sendOtp(user.email, user.name);
+    return new ApiResponse(200, {}, "OTP re-sent to email");
+}
+
+export async function login(input: any) {
+    let data: LoginInput;
+    try {
+        data = validateLoginInput(input);
+    } catch (err: any) {
+        throw new ApiError(400, err.message);
+    }
+
+    const user = await User.findOne({ email: data.email });
+    if (!user) {
+        throw new ApiError(404, "User does not exist");
+    }
+
+    const passwordOk = await user.isPasswordCorrect(data.password);
+    if (!passwordOk) {
+        throw new ApiError(401, "Invalid credentials");
+    }
+
+    if (!user.isEmailVerified) {
+        throw new ApiError(403, "Email not verified. Please verify using OTP.");
+    }
+
+    const accessToken = signAccessToken({ _id: user._id.toString(), role: user.role, email: user.email });
+    const refreshToken = signRefreshToken({ _id: user._id.toString(), role: user.role, email: user.email });
+
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    return new ApiResponse(200, {
+        user: sanitizeUser(user),
+        accessToken,
+        refreshToken,
+    }, "Logged in successfully");
+}

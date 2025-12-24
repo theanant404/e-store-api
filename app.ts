@@ -4,6 +4,7 @@ import { rateLimit, ipKeyGenerator, type Options } from "express-rate-limit";
 import cookieParser from "cookie-parser";
 import helmet from "helmet"; // SECURITY: Added Helmet
 import { ApiError } from "./src/utils/ApiError";
+import authRouter from "./src/routes/auth.route";
 const app = express();
 const httpServer = createServer(app);
 
@@ -59,6 +60,8 @@ app.use(cookieParser());
 app.use(express.static("public"));
 
 // 5. Routes
+app.use("/api/v1/auth", authRouter);
+
 app.get("/", (_req: Request, res: Response) => {
     type User = {
         id: string;
