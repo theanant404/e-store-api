@@ -1,6 +1,6 @@
 import express, { type NextFunction, type Request, type Response } from "express";
 import { createServer } from "http";
-import { rateLimit, ipKeyGenerator, type Options } from "express-rate-limit"; // Added Options type
+import { rateLimit, ipKeyGenerator, type Options } from "express-rate-limit";
 import cookieParser from "cookie-parser";
 import helmet from "helmet"; // SECURITY: Added Helmet
 import { ApiError } from "./src/utils/ApiError";
@@ -39,7 +39,7 @@ const limiter = rateLimit({
     standardHeaders: 'draft-8', // Use latest IETF standard headers
     legacyHeaders: false,
     // Use helper to ensure IPv6 is handled correctly
-    keyGenerator: (req: Request) => ipKeyGenerator(req.ip ?? req.socket.remoteAddress ?? ""),
+    keyGenerator: (req: Request) => ipKeyGenerator(req),
     handler: (req: Request, res: Response, next: NextFunction, options: Options) => {
         const minutes = options.windowMs / 60000;
         // Pass error to next() instead of throwing inside handler
@@ -82,6 +82,6 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     });
 });
 
-export { httpServer };
+export { app, httpServer };
 
 
