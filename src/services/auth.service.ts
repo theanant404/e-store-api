@@ -30,6 +30,7 @@ async function sendOtp(email: string, name: string) {
 
 export async function register(input: any) {
     let data: RegisterInput;
+    console.log(" Register service called", input);
     try {
         data = validateRegisterInput(input);
     } catch (err: any) {
@@ -42,12 +43,12 @@ export async function register(input: any) {
     }
 
     const user = await User.create({
-        name: data.name,
+        name: data.name || data.email.split("@")[0],
         email: data.email,
         password: data.password,
         isEmailVerified: false,
     });
-
+    console.log(" user", user)
     await sendOtp(user.email, user.name);
 
     return new ApiResponse(201, { user: sanitizeUser(user) }, "User registered. OTP sent to email.");
@@ -99,6 +100,7 @@ export async function login(input: any) {
     let data: LoginInput;
     try {
         data = validateLoginInput(input);
+        console.log(" Login data validated", data);
     } catch (err: any) {
         throw new ApiError(400, err.message);
     }

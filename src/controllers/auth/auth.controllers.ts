@@ -25,6 +25,7 @@ export const resendEmailOtpController = asyncHandler(async (req: Request, res: R
 });
 
 export const loginController = asyncHandler(async (req: Request, res: Response) => {
+    console.log(" Login controller called", req.body);
     const result = await login(req.body);
 
     const { accessToken, refreshToken } = result.data as any;
