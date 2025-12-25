@@ -18,6 +18,7 @@ redis.on("connect", () => {
 
 export const setOtp = async (email: string, otp: string, ttlSeconds: number) => {
     await redis.set(`otp:${email}`, otp, "EX", ttlSeconds);
+
 };
 
 export const getOtp = async (email: string) => {
