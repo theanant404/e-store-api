@@ -13,7 +13,9 @@ export type VerifyOtpInput = {
     email: string;
     otp: string;
 };
-
+export type ResendOtpInput = {
+    email: string;
+};
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function validateRegisterInput(body: any): RegisterInput {
@@ -50,4 +52,12 @@ export function validateVerifyOtpInput(body: any): VerifyOtpInput {
         throw new Error("OTP is required");
     }
     return { email: email.toLowerCase(), otp };
+}
+
+export function validateResendOtpInput(body: any): ResendOtpInput {
+    const { email } = body ?? {};
+    if (!email || typeof email !== "string" || !emailRegex.test(email)) {
+        throw new Error("Valid email is required");
+    }
+    return { email: email.toLowerCase() };
 }

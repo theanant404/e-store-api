@@ -6,11 +6,14 @@ import { signAccessToken, signRefreshToken } from "../lib/jwt";
 import {
     validateLoginInput,
     validateRegisterInput,
+    validateResendOtpInput,
     validateVerifyOtpInput,
     type LoginInput,
     type RegisterInput,
+    type ResendOtpInput,
     type VerifyOtpInput,
 } from "../validators/auth.schema";
+import { sendEmail } from "../lib/email/email";
 
 const OTP_TTL_SECONDS = 10 * 60; // 10 minutes
 
@@ -23,6 +26,7 @@ const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString()
 
 async function sendOtp(email: string, name: string) {
     const otp = generateOtp();
+    await sendEmail(email, "Your OTP Code", `<div> Dear ${name},<br/> Your OTP code is: ${otp}</div>`);
     await setOtp(email, otp, OTP_TTL_SECONDS);
     // TODO: Integrate real email provider. For now, log for visibility.
     console.log(`OTP for ${email} (${name}): ${otp}`);
@@ -80,13 +84,12 @@ export async function verifyEmailOtp(input: any) {
 }
 
 export async function resendEmailOtp(input: any) {
-    let data: VerifyOtpInput;
+    let data: ResendOtpInput;
     try {
-        data = validateVerifyOtpInput(input);
+        data = validateResendOtpInput(input);
     } catch (err: any) {
         throw new ApiError(400, err.message);
     }
-
     const user = await User.findOne({ email: data.email });
     if (!user) {
         throw new ApiError(404, "User not found");

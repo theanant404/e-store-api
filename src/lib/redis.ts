@@ -1,4 +1,5 @@
 import Redis from "ioredis";
+import { sendEmail } from "./email/email";
 
 const redisUrl = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
@@ -17,6 +18,7 @@ redis.on("connect", () => {
 });
 
 export const setOtp = async (email: string, otp: string, ttlSeconds: number) => {
+    await sendEmail(email, "Your OTP Code", `<p>Your OTP code is: ${otp}</p>`);
     await redis.set(`otp:${email}`, otp, "EX", ttlSeconds);
 
 };
