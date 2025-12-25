@@ -8,6 +8,8 @@ import {
     resendEmailOtp,
     login,
     loginWithOtp,
+    requestPasswordReset,
+    resetPasswordWithOtp,
 } from "../../services/auth.service";
 
 export const registerController = asyncHandler(async (req: Request, res: Response) => {
@@ -22,6 +24,11 @@ export const verifyEmailController = asyncHandler(async (req: Request, res: Resp
 
 export const resendEmailOtpController = asyncHandler(async (req: Request, res: Response) => {
     const result = await resendEmailOtp(req.body);
+    res.status(result.statusCode).json(result);
+});
+
+export const requestPasswordResetController = asyncHandler(async (req: Request, res: Response) => {
+    const result = await requestPasswordReset(req.body);
     res.status(result.statusCode).json(result);
 });
 
@@ -43,6 +50,22 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
 });
 export const loginWithOtpController = asyncHandler(async (req: Request, res: Response) => {
     const result = await loginWithOtp(req.body);
+    const { accessToken, refreshToken } = result.data as any;
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax" as const,
+    };
+
+    res
+        .cookie("accessToken", accessToken, cookieOptions)
+        .cookie("refreshToken", refreshToken, cookieOptions)
+        .status(result.statusCode)
+        .json(result);
+});
+
+export const resetPasswordWithOtpController = asyncHandler(async (req: Request, res: Response) => {
+    const result = await resetPasswordWithOtp(req.body);
     const { accessToken, refreshToken } = result.data as any;
     const cookieOptions = {
         httpOnly: true,

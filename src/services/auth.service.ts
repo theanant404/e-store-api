@@ -9,6 +9,8 @@ import {
     validateResendOtpInput,
     validateVerifyOtpInput,
     type VerifyOtpInput,
+    validateResetPasswordInput,
+    type ResetPasswordInput,
     type LoginInput,
     type RegisterInput,
     type ResendOtpInput,
@@ -99,6 +101,23 @@ export async function resendEmailOtp(input: any) {
     return new ApiResponse(200, {}, "OTP re-sent to email");
 }
 
+export async function requestPasswordReset(input: any) {
+    let data: ResendOtpInput;
+    try {
+        data = validateResendOtpInput(input);
+    } catch (err: any) {
+        throw new ApiError(400, err.message);
+    }
+
+    const user = await User.findOne({ email: data.email });
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    await sendOtp(user.email, user.name);
+    return new ApiResponse(200, {}, "OTP sent. Please verify your email with the new password.");
+}
+
 export async function login(input: any) {
     let data: LoginInput;
     try {
@@ -170,4 +189,42 @@ export async function loginWithOtp(input: any) {
         accessToken,
         refreshToken,
     }, "Logged in with OTP successfully");
+}
+
+export async function resetPasswordWithOtp(input: any) {
+    let data: ResetPasswordInput;
+    try {
+        data = validateResetPasswordInput(input);
+    } catch (err: any) {
+        throw new ApiError(400, err.message);
+    }
+
+    const user = await User.findOne({ email: data.email });
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    const storedOtp = await getOtp(data.email);
+    if (!storedOtp || storedOtp !== data.otp) {
+        throw new ApiError(400, "Incorrect OTP. Please enter the correct OTP");
+    }
+
+    user.password = data.password; // hashed by pre-save hook
+    user.isEmailVerified = true;
+    user.loginType = "EMAIL_PASSWORD_RESET";
+
+    const accessToken = signAccessToken({ _id: user._id.toString(), role: user.role, email: user.email });
+    const refreshToken = signRefreshToken({ _id: user._id.toString(), role: user.role, email: user.email });
+
+    user.refreshToken = refreshToken;
+    await Promise.all([
+        user.save(),
+        deleteOtp(data.email),
+    ]);
+
+    return new ApiResponse(200, {
+        user: sanitizeUser(user),
+        accessToken,
+        refreshToken,
+    }, "Password updated. Logged in successfully");
 }

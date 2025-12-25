@@ -16,6 +16,11 @@ export type VerifyOtpInput = {
 export type ResendOtpInput = {
     email: string;
 };
+export type ResetPasswordInput = {
+    email: string;
+    otp: string;
+    password: string;
+};
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function validateRegisterInput(body: any): RegisterInput {
@@ -60,4 +65,18 @@ export function validateResendOtpInput(body: any): ResendOtpInput {
         throw new Error("Valid email is required");
     }
     return { email: email.toLowerCase() };
+}
+
+export function validateResetPasswordInput(body: any): ResetPasswordInput {
+    const { email, otp, password } = body ?? {};
+    if (!email || typeof email !== "string" || !emailRegex.test(email)) {
+        throw new Error("Valid email is required");
+    }
+    if (!otp || typeof otp !== "string" || otp.length < 4) {
+        throw new Error("OTP is required");
+    }
+    if (!password || typeof password !== "string" || password.length < 8) {
+        throw new Error("Password must be at least 8 characters");
+    }
+    return { email: email.toLowerCase(), otp, password };
 }
