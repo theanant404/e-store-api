@@ -8,10 +8,10 @@ import {
     validateRegisterInput,
     validateResendOtpInput,
     validateVerifyOtpInput,
+    type VerifyOtpInput,
     type LoginInput,
     type RegisterInput,
     type ResendOtpInput,
-    type VerifyOtpInput,
 } from "../validators/auth.schema";
 import { sendEmail } from "../lib/email/email";
 
@@ -133,4 +133,41 @@ export async function login(input: any) {
         accessToken,
         refreshToken,
     }, "Logged in successfully");
+}
+
+export async function loginWithOtp(input: any) {
+    let data: VerifyOtpInput;
+    try {
+        data = validateVerifyOtpInput(input);
+    } catch (err: any) {
+        throw new ApiError(400, err.message);
+    }
+
+    const user = await User.findOne({ email: data.email });
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    const storedOtp = await getOtp(data.email);
+    if (!storedOtp || storedOtp !== data.otp) {
+        throw new ApiError(400, "Invalid or expired OTP");
+    }
+
+    user.isEmailVerified = true;
+    user.loginType = "EMAIL_OTP";
+
+    const accessToken = signAccessToken({ _id: user._id.toString(), role: user.role, email: user.email });
+    const refreshToken = signRefreshToken({ _id: user._id.toString(), role: user.role, email: user.email });
+
+    user.refreshToken = refreshToken;
+    await Promise.all([
+        user.save({ validateBeforeSave: false }),
+        deleteOtp(data.email),
+    ]);
+
+    return new ApiResponse(200, {
+        user: sanitizeUser(user),
+        accessToken,
+        refreshToken,
+    }, "Logged in with OTP successfully");
 }

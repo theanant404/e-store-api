@@ -7,6 +7,7 @@ import {
     verifyEmailOtp,
     resendEmailOtp,
     login,
+    loginWithOtp,
 } from "../../services/auth.service";
 
 export const registerController = asyncHandler(async (req: Request, res: Response) => {
@@ -27,7 +28,6 @@ export const resendEmailOtpController = asyncHandler(async (req: Request, res: R
 export const loginController = asyncHandler(async (req: Request, res: Response) => {
     console.log(" Login controller called", req.body);
     const result = await login(req.body);
-
     const { accessToken, refreshToken } = result.data as any;
     const cookieOptions = {
         httpOnly: true,
@@ -41,7 +41,21 @@ export const loginController = asyncHandler(async (req: Request, res: Response) 
         .status(result.statusCode)
         .json(result);
 });
+export const loginWithOtpController = asyncHandler(async (req: Request, res: Response) => {
+    const result = await loginWithOtp(req.body);
+    const { accessToken, refreshToken } = result.data as any;
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax" as const,
+    };
 
+    res
+        .cookie("accessToken", accessToken, cookieOptions)
+        .cookie("refreshToken", refreshToken, cookieOptions)
+        .status(result.statusCode)
+        .json(result);
+});
 export const meController = asyncHandler(async (req: Request, res: Response) => {
     if (!req.user) {
         throw new ApiError(401, "Unauthorized");
