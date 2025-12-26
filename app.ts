@@ -7,6 +7,8 @@ import { ApiError } from "./src/utils/ApiError";
 import authRouter from "./src/routes/auth.route";
 import uploadsRouter from "./src/routes/uploads.route";
 import categoryRouter from "./src/routes/category.route";
+import productRouter from "./src/routes/product.route";
+import varietyRouter from "./src/routes/variety.route";
 const app = express();
 const httpServer = createServer(app);
 
@@ -65,6 +67,8 @@ app.use(express.static("public"));
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/uploads", uploadsRouter);
 app.use("/api/v1/categories", categoryRouter);
+app.use("/api/v1/products", productRouter);
+app.use("/api/v1/products/:productId/varieties", varietyRouter);
 
 app.get("/", (_req: Request, res: Response) => {
     type User = {
