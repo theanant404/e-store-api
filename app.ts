@@ -6,6 +6,7 @@ import helmet from "helmet"; // SECURITY: Added Helmet
 import { ApiError } from "./src/utils/ApiError";
 import authRouter from "./src/routes/auth.route";
 import uploadsRouter from "./src/routes/uploads.route";
+import categoryRouter from "./src/routes/category.route";
 const app = express();
 const httpServer = createServer(app);
 
@@ -63,6 +64,7 @@ app.use(express.static("public"));
 // 5. Routes
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/uploads", uploadsRouter);
+app.use("/api/v1/categories", categoryRouter);
 
 app.get("/", (_req: Request, res: Response) => {
     type User = {
