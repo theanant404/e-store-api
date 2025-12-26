@@ -15,7 +15,7 @@ import {
     type RegisterInput,
     type ResendOtpInput,
 } from "../validators/auth.schema";
-import { sendEmail } from "../lib/email/email";
+import { sendEmail } from "../lib/email";
 
 const OTP_TTL_SECONDS = 10 * 60; // 10 minutes
 
@@ -54,7 +54,7 @@ export async function register(input: any) {
         password: data.password,
         isEmailVerified: false,
     });
-    console.log(" user", user)
+    // console.log(" user", user)
     await sendOtp(user.email, user.name);
 
     return new ApiResponse(201, { user: sanitizeUser(user) }, "User registered. OTP sent to email.");

@@ -5,7 +5,9 @@ declare global {
         interface User extends JwtPayload { }
         interface Request {
             user?: User;
+            files?: MulterFiles;
         }
+        type MulterFiles = Express.Multer.File[] | Record<string, Express.Multer.File[]>;
     }
 }
 
