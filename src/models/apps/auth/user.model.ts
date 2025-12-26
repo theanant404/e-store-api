@@ -15,6 +15,7 @@ export interface IUser extends Document {
     isEmailVerified: boolean;
     refreshToken?: string;
     loginType?: string;
+    isBlocked: boolean;
     generateAccessToken: () => string;
     generateRefreshToken: () => string;
     isPasswordCorrect: (password: string) => Promise<boolean>;
@@ -32,6 +33,7 @@ const userSchema = new Schema<IUser>(
         mobile: { type: String, unique: true, sparse: true },
         password: { type: String, required: true, minlength: 8 },
         role: { type: String, enum: Object.values(UserRolesEnum), default: UserRolesEnum.USER },
+        isBlocked: { type: Boolean, default: false },
         isEmailVerified: { type: Boolean, default: false },
         refreshToken: { type: String },
         loginType: { type: String, default: "EMAIL_PASSWORD" },

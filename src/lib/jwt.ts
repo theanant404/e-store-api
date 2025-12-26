@@ -10,6 +10,7 @@ export type JwtPayload = {
     _id: string;
     role: string;
     email: string;
+    isBlocked?: boolean;
 };
 
 export const signAccessToken = (payload: JwtPayload, expiresIn: SignOptions["expiresIn"] = ACCESS_TOKEN_TTL) => {
