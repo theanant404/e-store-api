@@ -1,5 +1,5 @@
 import Redis from "ioredis";
-import { sendEmail } from "./email/email";
+import { sendEmail } from "./email";
 
 const redisUrl = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
