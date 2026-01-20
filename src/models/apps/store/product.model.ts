@@ -2,7 +2,6 @@ import mongoose, { Schema, type Document, type Model, type Types } from "mongoos
 
 export interface IProductImage {
     url: string;
-    publicId: string;
 }
 
 export interface IProduct extends Document {
@@ -13,20 +12,14 @@ export interface IProduct extends Document {
     varietyIds: Types.ObjectId[];
 }
 
-const imageSchema = new Schema<IProductImage>(
-    {
-        url: { type: String, required: true, trim: true },
-        publicId: { type: String, required: true, trim: true },
-    },
-    { _id: false }
-);
+
 
 const productSchema = new Schema<IProduct>(
     {
         title: { type: String, required: true, trim: true },
         description: { type: String, trim: true },
         category: { type: Schema.Types.ObjectId, ref: "Category", required: true, index: true },
-        images: { type: [imageSchema], default: [] },
+        images: { type: [String], default: [] },
         varietyIds: [{ type: Schema.Types.ObjectId, ref: "Variety", default: [] }],
     },
     { timestamps: true }

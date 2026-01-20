@@ -31,19 +31,11 @@ const createProductController = asyncHandler(async (req: Request, res: Response)
         throw new ApiError(404, "Category not found");
     }
 
-    const formattedImages = images
-        .filter((img: any) => img && typeof img.url === "string" && typeof img.publicId === "string")
-        .map((img: any) => ({ url: img.url.trim(), publicId: img.publicId.trim() }));
-
-    if (!formattedImages.length) {
-        throw new ApiError(400, "images must include url and publicId for each item");
-    }
-
     const product = await Product.create({
         title: title.trim(),
         description: description?.trim(),
         category,
-        images: formattedImages,
+        images,
         varietyIds: [],
     });
 
