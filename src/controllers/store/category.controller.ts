@@ -8,7 +8,7 @@ const normalizeSlug = (slug: string) => slug.trim().toLowerCase();
 
 const createCategoryController = asyncHandler(async (req: Request, res: Response) => {
     const { title, slug, imageUrl, description } = req.body ?? {};
-    console.log("Create category called with body:", req.body);
+    // console.log("Create category called with body:", req.body);
     if (!title || !slug || !imageUrl) {
         throw new ApiError(400, "title, slug, and imageUrl are required");
     }
@@ -38,14 +38,12 @@ const updateCategoryController = asyncHandler(async (req: Request, res: Response
         throw new ApiError(400, "Category id is required");
     }
 
-    const { title, slug, imageUrl, imagePublicId, description } = req.body ?? {};
-
+    const { title, slug, imageUrl, description } = req.body ?? {};
+    // console.log("Update category called with body:", req.body);
     const update: Record<string, unknown> = {};
     if (title) update.title = title.trim();
     if (typeof description === "string") update.description = description.trim();
     if (imageUrl) update.imageUrl = imageUrl.trim();
-    if (imagePublicId) update.imagePublicId = imagePublicId.trim();
-
     if (slug) {
         const normalizedSlug = normalizeSlug(slug);
         const exists = await Category.findOne({ slug: normalizedSlug, _id: { $ne: id } }).lean();
