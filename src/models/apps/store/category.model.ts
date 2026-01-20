@@ -5,21 +5,18 @@ export interface ICategory extends Document {
     slug: string;
     description?: string;
     imageUrl: string;
-    imagePublicId: string;
 }
 
 const categorySchema = new Schema<ICategory>(
     {
-        title: { type: String, required: true, trim: true },
-        slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
+        title: { type: String, required: true, trim: true, index: true },
+        slug: { type: String, required: true, unique: true, lowercase: true, trim: true, index: true },
         description: { type: String, trim: true },
         imageUrl: { type: String, required: true, trim: true },
-        imagePublicId: { type: String, required: true, trim: true },
     },
     { timestamps: true }
 );
 
-categorySchema.index({ slug: 1 }, { unique: true });
 
 export const Category: Model<ICategory> =
     mongoose.models.Category || mongoose.model<ICategory>("Category", categorySchema);
