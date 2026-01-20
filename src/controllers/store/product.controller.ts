@@ -8,10 +8,16 @@ import { ApiError } from "../../utils/ApiError";
 import { ApiResponse } from "../../utils/ApiResponse";
 
 const validateObjectId = (id: string) => Types.ObjectId.isValid(id);
-
+const getAllProducts = asyncHandler(async () => {
+    return await Product.find()
+        .populate("category")
+        .populate("varietyIds")
+        .sort({ createdAt: -1 })
+        .lean();
+});
 const createProductController = asyncHandler(async (req: Request, res: Response) => {
     const { title, description, category, images, varieties } = req.body ?? {};
-
+    console.log("Create product called with body:", req.body);
     if (!title || !category || !Array.isArray(images) || !images.length) {
         throw new ApiError(400, "title, category, and images[] are required");
     }
@@ -143,8 +149,10 @@ const listProductsController = asyncHandler(async (_req: Request, res: Response)
 });
 
 export {
+    getAllProducts,
     createProductController,
     updateProductController,
     deleteProductController,
     listProductsController,
+
 };
