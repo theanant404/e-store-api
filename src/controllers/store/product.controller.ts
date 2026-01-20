@@ -132,12 +132,25 @@ const deleteProductController = asyncHandler(async (req: Request, res: Response)
 });
 
 const listProductsController = asyncHandler(async (_req: Request, res: Response) => {
+    
     const products = await Product.find()
         .populate("category")
-        .populate("varietyIds")
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .lean();
 
-    res.status(200).json(new ApiResponse(200, products, "Products fetched"));
+    // For each product, fetch its varieties by varietyIds
+    const productIdsWithVarieties = await Promise.all(
+        products.map(async (product) => {
+            const varieties = product.varietyIds && product.varietyIds.length
+                ? await Variety.find({ _id: { $in: product.varietyIds } }).lean()
+                : [];
+            return {
+                ...product,
+                varieties,
+            };
+        })
+    );
+    res.status(200).json(new ApiResponse(200, productIdsWithVarieties, "Products fetched"));
 });
 
 export {
