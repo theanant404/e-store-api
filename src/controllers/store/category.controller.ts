@@ -7,10 +7,10 @@ import { ApiResponse } from "../../utils/ApiResponse";
 const normalizeSlug = (slug: string) => slug.trim().toLowerCase();
 
 const createCategoryController = asyncHandler(async (req: Request, res: Response) => {
-    const { title, slug, imageUrl, imagePublicId, description } = req.body ?? {};
-
-    if (!title || !slug || !imageUrl || !imagePublicId) {
-        throw new ApiError(400, "title, slug, imageUrl, and imagePublicId are required");
+    const { title, slug, imageUrl, description } = req.body ?? {};
+    console.log("Create category called with body:", req.body);
+    if (!title || !slug || !imageUrl) {
+        throw new ApiError(400, "title, slug, and imageUrl are required");
     }
 
     const normalizedSlug = normalizeSlug(slug);
@@ -23,13 +23,15 @@ const createCategoryController = asyncHandler(async (req: Request, res: Response
         title: title.trim(),
         slug: normalizedSlug,
         imageUrl: imageUrl.trim(),
-        imagePublicId: imagePublicId.trim(),
         description: description?.trim(),
     });
 
     res.status(201).json(new ApiResponse(201, category, "Category created"));
 });
-
+const getCategoryAllController = asyncHandler(async (req: Request, res: Response) => {
+    const categories = await Category.find().lean();
+    res.status(200).json(new ApiResponse(200, categories, "Categories fetched"));
+});
 const updateCategoryController = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     if (!id) {
@@ -79,4 +81,4 @@ const deleteCategoryController = asyncHandler(async (req: Request, res: Response
     res.status(200).json(new ApiResponse(200, category, "Category deleted"));
 });
 
-export { createCategoryController, updateCategoryController, deleteCategoryController };
+export { createCategoryController, updateCategoryController, deleteCategoryController, getCategoryAllController };
