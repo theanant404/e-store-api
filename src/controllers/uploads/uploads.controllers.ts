@@ -34,17 +34,6 @@ const deleteImageController = asyncHandler(async (req: Request, res: Response) =
     res.status(200).json(new ApiResponse(200, { result, publicId }, "Image deleted"));
 });
 
-const deleteImagesBulkController = asyncHandler(async (req: Request, res: Response) => {
-    const publicIds = Array.isArray(req.body?.publicIds)
-        ? req.body.publicIds.filter((id): id is string => typeof id === "string" && id.trim().length > 0)
-        : [];
 
-    if (!publicIds.length) {
-        throw new ApiError(400, "publicIds must be a non-empty string array");
-    }
 
-    const results = await deleteImagesByPublicIds(publicIds);
-    res.status(200).json(new ApiResponse(200, { count: results.length, results }, "Images processed"));
-});
-
-export { getSignedUploadController, deleteImageController, deleteImagesBulkController };
+export { getSignedUploadController, deleteImageController };
