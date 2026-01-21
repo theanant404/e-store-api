@@ -9,15 +9,16 @@ import { UserAddress } from "../../models/apps/user/address.model";
 export const addAddress = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?._id;
     const address = req.body;
+    console.log("Add address called with body:", req.body);
     if (!userId || !address) throw new ApiError(400, "User and address required");
     // Validate required fields from UserAddress schema
-    const requiredFields = ["fullname", "phoneNumber", "address", "village", "pincode"];
+    const requiredFields = ["fullName", "phoneNumber", "address", "village", "pincode"];
     for (const field of requiredFields) {
         if (!address[field]) throw new ApiError(400, `Missing required field: ${field}`);
     }
     // Only allow fields from UserAddress schema
     const addressData = {
-        fullname: address.fullname,
+        fullName: address.fullName,
         phoneNumber: address.phoneNumber,
         address: address.address,
         landmarks: address.landmarks,

@@ -11,7 +11,7 @@ import mongoose, { Schema, type Document, type Model } from "mongoose";
   final bool isDefault;
  */
 export interface IAddress extends Document {
-    fullname: string;
+    fullName: string;
     phoneNumber: string;
     address: string;
     landmarks: string;
@@ -24,13 +24,13 @@ export interface IAddress extends Document {
 }
 const addressSchema = new Schema<IAddress>(
     {
-        fullname: { type: String, required: true, trim: true },
+        fullName: { type: String, required: true, trim: true },
         phoneNumber: { type: String, required: true, trim: true },
         address: { type: String, required: true, trim: true },
         landmarks: { type: String, trim: true },
         village: { type: String, required: true, trim: true },
         pincode: { type: String, required: true, trim: true },
-        latitude: { type: Number },
+        latitude: { type: Number, optional: true, trim: true },
         longitude: { type: Number },
         isDefault: { type: Boolean, default: false },
         user: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
