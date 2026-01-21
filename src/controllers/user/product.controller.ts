@@ -40,8 +40,12 @@ export const getUserOrders = asyncHandler(async (req: Request, res: Response) =>
     const userId = req.user?._id;
     if (!userId) throw new ApiError(400, "User ID required");
 
-    const orders = await UserOrder.find({ user: userId }).sort({ createdAt: -1 });
+    const orders = await UserOrder.find({ user: userId })
+        .populate('addressId')
+        .sort({ createdAt: -1 });
+    // console.log("Fetched orders for user:", orders);
     res.status(200).json(new ApiResponse(200, orders, "User orders fetched"));
+
 });
 
 // Get order by ID
