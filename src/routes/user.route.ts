@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { addAddress, editAddress, deleteAddress, getAddresses } from "../controllers/user/address.controller";
 import { addItemToCart, clearUserCart, getUserCart, removeItemFromCart } from "../controllers/user/cart.controllers";
-
+import { createOrder, getOrderById, getUserOrders, cancelOrder } from "../controllers/user/product.controller";
 import { requireAuth } from "../middleware/auth";
 const router = Router();
 
@@ -15,5 +15,9 @@ router.post("/cart", requireAuth, addItemToCart);
 router.get("/cart", requireAuth, getUserCart);
 router.delete("/cart/item", requireAuth, removeItemFromCart);
 router.delete("/cart", requireAuth, clearUserCart);
-
+// Checkout routes
+router.post("/orders", requireAuth, createOrder);
+router.get("/orders", requireAuth, getUserOrders);
+router.get("/orders/:orderId", requireAuth, getOrderById);
+router.post("/orders/:orderId/cancel", requireAuth, cancelOrder);
 export default router;
