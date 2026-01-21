@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { blockUserController, listUsersController, updateUserRoleController } from "../controllers/admin/user.admin.controller";
+import { blockUserController, listUsersController, unblockedUserController, updateUserRoleController } from "../controllers/admin/user.admin.controller";
 import { deleteOrder, getAllOrders, getOrderByIdAdmin, getOrderStats, updateOrderStatus } from "../controllers/admin/order.admin.controller";
 import { requireAdmin, requireAuth } from "../middleware/auth";
 
@@ -11,6 +11,7 @@ router.use(requireAuth, requireAdmin);
 router.get("/users", listUsersController);
 router.patch("/users/:id/role", updateUserRoleController);
 router.patch("/users/:id/block", blockUserController);
+router.patch("/users/:id/unblock", unblockedUserController);
 
 // Order management routes
 router.get("/orders", getAllOrders);

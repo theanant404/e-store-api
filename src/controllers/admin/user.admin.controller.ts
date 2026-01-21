@@ -31,12 +31,12 @@ const updateUserRoleController = asyncHandler(async (req: Request, res: Response
 
     const user = await User.findByIdAndUpdate(id, { role }, { new: true })
         .select("-password -refreshToken");
-
+    // console.log("Updated user role:", user);
     if (!user) {
         throw new ApiError(404, "User not found");
     }
 
-    res.status(200).json(new ApiResponse(200, user, "User role updated"));
+    res.status(200).json(new ApiResponse(200, user.role, "User role updated"));
 });
 
 const blockUserController = asyncHandler(async (req: Request, res: Response) => {
@@ -58,7 +58,22 @@ const blockUserController = asyncHandler(async (req: Request, res: Response) => 
         throw new ApiError(404, "User not found");
     }
 
-    res.status(200).json(new ApiResponse(200, user, blocked ? "User blocked" : "User unblocked"));
+    res.status(200).json(new ApiResponse(200, user.role, blocked ? "User blocked" : "User unblocked"));
 });
-
-export { listUsersController, updateUserRoleController, blockUserController };
+const unblockedUserController = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { isBlocked } = req.body ?? {};
+    if (!id || !isValidId(id)) {
+        throw new ApiError(400, "Valid user id is required");
+    }
+    if (typeof isBlocked !== "boolean") {
+        throw new ApiError(400, "isBlocked must be a boolean");
+    }
+    const user = await User.findByIdAndUpdate(id, { isBlocked: isBlocked }, { new: true })
+        .select("-password -refreshToken");
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+    res.status(200).json(new ApiResponse(200, user.role, "User unblocked"));
+});
+export { listUsersController, updateUserRoleController, blockUserController, unblockedUserController };
