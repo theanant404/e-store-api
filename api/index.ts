@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import connectDB from "../src/db/mongodb";
+import connectDB, { dbInstance } from "../src/db/mongodb";
 import app from "../app";
 
 
@@ -8,8 +8,19 @@ dotenv.config({
 });
 
 if (process.env.VERCEL) {
-    // On Vercel, just connect to DB (no listen)
-    connectDB();
+    // Vercel: lazy-connect DB on first request, avoid crashing if env missing
+    const shouldSkip = (path: string) => path === "/healthz" || path === "/";
+    app.use(async (req, _res, next) => {
+        if (shouldSkip(req.path)) return next();
+        try {
+            if (!dbInstance) {
+                await connectDB();
+            }
+            next();
+        } catch (err) {
+            next(err);
+        }
+    });
 } else {
     // Local development: start server
     connectDB().then(() => {

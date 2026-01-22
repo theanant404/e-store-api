@@ -1,51 +1,20 @@
 {
     "version": 2,
-    "builds": [
-        {
-            "src": "api/index.ts",
-            "use": "@vercel/node"
+    "functions": {
+        "api/index.ts": {
+            "runtime": "nodejs18.x",
+            "memory": 1024,
+            "maxDuration": 10
         }
-    ],
-    "routes": [
+    },
+    "rewrites": [
         {
-            "src": "/api/v1/auth(?:/.*)?",
-            "dest": "/api/index.ts"
+            "source": "/api/(.*)",
+            "destination": "/api/index.ts"
         },
         {
-            "src": "/api/v1/uploads(?:/.*)?",
-            "dest": "/api/index.ts"
-        },
-        {
-            "src": "/api/v1/categories(?:/.*)?",
-            "dest": "/api/index.ts"
-        },
-        {
-            "src": "/api/v1/products(?:/.*)?",
-            "dest": "/api/index.ts"
-        },
-        {
-            "src": "/api/v1/products/.*/varieties(?:/.*)?",
-            "dest": "/api/index.ts"
-        },
-        {
-            "src": "/api/v1/admin(?:/.*)?",
-            "dest": "/api/index.ts"
-        },
-        {
-            "src": "/api/v1/user(?:/.*)?",
-            "dest": "/api/index.ts"
-        },
-        {
-            "src": "/api/v1/delivery(?:/.*)?",
-            "dest": "/api/index.ts"
-        },
-        {
-            "src": "/healthz",
-            "dest": "/api/index.ts"
-        },
-        {
-            "src": "/",
-            "dest": "/api/index.ts"
+            "source": "/(.*)",
+            "destination": "/api/index.ts"
         }
     ]
 }
