@@ -1,6 +1,7 @@
 {
   "name": "bunapi",
   "module": "index.ts",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "bun --hot index.ts",
