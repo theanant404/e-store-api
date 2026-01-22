@@ -1,3 +1,51 @@
 {
-    "bunVersion": "1.x"
+    "version": 2,
+    "builds": [
+        {
+            "src": "index.ts",
+            "use": "@vercel/node"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/v1/auth(?:/.*)?",
+            "dest": "/index.ts"
+        },
+        {
+            "src": "/api/v1/uploads(?:/.*)?",
+            "dest": "/index.ts"
+        },
+        {
+            "src": "/api/v1/categories(?:/.*)?",
+            "dest": "/index.ts"
+        },
+        {
+            "src": "/api/v1/products(?:/.*)?",
+            "dest": "/index.ts"
+        },
+        {
+            "src": "/api/v1/products/.*/varieties(?:/.*)?",
+            "dest": "/index.ts"
+        },
+        {
+            "src": "/api/v1/admin(?:/.*)?",
+            "dest": "/index.ts"
+        },
+        {
+            "src": "/api/v1/user(?:/.*)?",
+            "dest": "/index.ts"
+        },
+        {
+            "src": "/api/v1/delivery(?:/.*)?",
+            "dest": "/index.ts"
+        },
+        {
+            "src": "/healthz",
+            "dest": "/index.ts"
+        },
+        {
+            "src": "/",
+            "dest": "/index.ts"
+        }
+    ]
 }
