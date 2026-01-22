@@ -70,19 +70,19 @@ app.use(express.static("public"));
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/uploads", uploadsRouter);
 app.use("/api/v1/categories", categoryRouter);
-app.use("/api/v1/products", productRouter);
+app.use("/", productRouter);
 app.use("/api/v1/products/:productId/varieties", varietyRouter);
 app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/delivery", deliveryRouter); // added to test admin user controller
-app.get("/", (_req: Request, res: Response) => {
-    type User = {
-        id: string;
-        name: string;
-    };
-    let user: User = { id: "1", name: "Anant" };
-    res.json({ success: true, message: "Welcome to the Home Page", timestamp: new Date().toISOString(), user });
-});
+// app.get("/", (_req: Request, res: Response) => {
+//     type User = {
+//         id: string;
+//         name: string;
+//     };
+//     let user: User = { id: "1", name: "Anant" };
+//     res.json({ success: true, message: "Welcome to the Home Page", timestamp: new Date().toISOString(), user });
+// });
 
 app.get("/healthz", (_req: Request, res: Response) => {
     res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
