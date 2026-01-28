@@ -2,32 +2,38 @@ import dotenv from "dotenv";
 import connectDB, { dbInstance } from "../src/db/mongodb";
 import app from "../app";
 
-
 dotenv.config({
     path: "./.env",
 });
 
-if (process.env.VERCEL) {
-    // Vercel: lazy-connect DB on first request, avoid crashing if env missing
-    const shouldSkip = (path: string) => path === "/healthz" || path === "/";
-    app.use(async (req, _res, next) => {
-        if (shouldSkip(req.path)) return next();
+let dbConnected = false;
+
+const ensureDBConnection = async () => {
+    if (!dbConnected && !dbInstance) {
         try {
-            if (!dbInstance) {
-                await connectDB();
-            }
-            next();
+            await connectDB();
+            dbConnected = true;
         } catch (err) {
-            next(err);
+            console.error("Database connection error:", err);
+            throw err;
         }
-    });
-} else {
-    // Local development: start server
-    connectDB().then(() => {
-        app.listen(process.env.PORT || 8080, () => {
-            console.log("Server running on port", process.env.PORT || 8080);
-        });
-    });
-}
+    }
+};
+
+// For Vercel: Connect DB before handling requests
+app.use(async (req, _res, next) => {
+    const shouldSkip = (path: string) => path === "/healthz" || path === "/";
+
+    if (shouldSkip(req.path)) {
+        return next();
+    }
+
+    try {
+        await ensureDBConnection();
+        next();
+    } catch (err) {
+        next(err);
+    }
+});
 
 export default app;
