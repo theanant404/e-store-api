@@ -12,8 +12,36 @@ import varietyRouter from "./src/routes/variety.route";
 import adminRouter from "./src/routes/admin.route";
 import userRouter from "./src/routes/user.route";
 import deliveryRouter from "./src/routes/delivery.route";
+import connectDB, { dbInstance } from "./src/db/mongodb";
+import dotenv from "dotenv";
+
+dotenv.config();
+
 const app = express();
 const httpServer = createServer(app);
+
+// Database connection state
+let dbConnected = false;
+
+// Database connection middleware for Vercel
+const ensureDBConnection = async (req: Request, _res: Response, next: NextFunction) => {
+    const shouldSkip = req.path === "/healthz" || req.path === "/";
+
+    if (shouldSkip) {
+        return next();
+    }
+
+    try {
+        if (!dbConnected && !dbInstance) {
+            await connectDB();
+            dbConnected = true;
+        }
+        next();
+    } catch (err) {
+        console.error("Database connection error:", err);
+        next(err);
+    }
+};
 
 // 1. SECURITY: Add Helmet for secure headers
 app.use(helmet());
@@ -65,6 +93,9 @@ app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
 app.use(express.static("public"));
+
+// Database connection for Vercel
+app.use(ensureDBConnection);
 
 // 5. Routes
 app.use("/api/v1/auth", authRouter);
